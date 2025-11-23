@@ -5,7 +5,7 @@ use alnp::handshake::{ChallengeAuthenticator, HandshakeError, HandshakeMessage, 
 use alnp::handshake::transport::ReliableControlChannel;
 use alnp::messages::{
     Acknowledge, CapabilitySet, ControlEnvelope, ControlHeader, ControlPayload, DeviceIdentity,
-    IdentifyResponse, ProtocolVersion,
+    IdentifyResponse, ProtocolVersion, SetMode,
 };
 use alnp::session::state::SessionState;
 use alnp::session::{Ed25519Authenticator, StaticKeyAuthenticator};
@@ -140,4 +140,36 @@ fn device_identity_helper() {
         mode: alnp::messages::OperatingMode::Normal,
     };
     assert_eq!(info.version.major, 1);
+}
+
+#[test]
+fn control_envelope_signature_roundtrip() {
+    use alnp::control::{ControlCrypto, ControlResponder};
+    let mut secret = [0u8; 32];
+    OsRng.fill_bytes(&mut secret);
+    let signing = SigningKey::from_bytes(&secret);
+    let verifier = signing.verifying_key();
+    let crypto = ControlCrypto::new(signing, Some(verifier));
+    let payload = ControlPayload::SetMode(SetMode {
+        mode: alnp::messages::OperatingMode::Normal,
+    });
+    let env = crypto.sign_envelope(ControlEnvelope {
+        header: ControlHeader {
+            seq: 1,
+            nonce: vec![9, 9, 9],
+            timestamp_ms: 1,
+        },
+        payload,
+        signature: vec![],
+    });
+    let responder = ControlResponder::new(
+        DeviceIdentity {
+            cid: Uuid::new_v4(),
+            manufacturer: "ALNP".into(),
+            model: "Y1".into(),
+            firmware_rev: "1.0".into(),
+        },
+        crypto,
+    );
+    assert!(responder.verify(&env).is_ok());
 }
