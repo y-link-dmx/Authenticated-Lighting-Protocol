@@ -6,6 +6,7 @@ All notable changes to ALPINE will be documented in this file.
 - Introduce language-specific SDK layers (`src/alnp/src/sdk`, `bindings/ts/src/sdk`, `bindings/python/src/alnp/sdk`, `bindings/cpp/sdk`) that wrap the low-level helpers with ergonomic APIs (`connect`, `send_frame`, `control`, keepalive).
 - Update docs/README to position those SDKs as the recommended application entry points while keeping the auto-generated bindings stable for embedded use.
 - Keep the existing release artifacts and embedded CI job so every platform receives docs, GHCR C packages, and the new embedded validations together with the SDK helpers.
+- Document the documentation policy for every binding so public APIs explicitly describe behavioral guarantees, failure modes, and compatibility notes (`docs/documentation_policy.md`).
 
 ## [1.0.10] - 2025-12-03
 - Publish the Rust crate as `alpine-protocol-rs` so we can continue releasing from the `alpine-core` repo even though the old crate name was owned elsewhere.

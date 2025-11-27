@@ -75,6 +75,10 @@ Each binding provides:
 
 Use these SDKs as the primary application entry points, and reserve the auto-generated low-level bindings for embedded or constrained contexts.
 
+## Documentation as API contract
+
+ALPINE treats documentation as part of the API contract. Every public surface across Rust, TypeScript/JavaScript, C, C++, and Python must explain not only "how" but "what the system guarantees" under latency, packet loss, and load. See `docs/documentation_policy.md` for the language-by-language requirements (doc comments, JSDoc, Doxygen, docstrings, deprecation paths, behavioral guarantees, etc.).
+
 ## Embedded mode
 
 The C++ helper exposes an `ALPINE_EMBEDDED` configuration that keeps the API
