@@ -1,6 +1,11 @@
 # Changelog
 
-All notable changes to ALPINE will be documented in this file.
+- All notable changes to ALPINE will be documented in this file.
+
+## [1.0.7] - 2025-12-01
+- Keep the crate name `alpine-core` for crates.io while exposing the library as `alpine` so existing tests and consumers continue to import `alpine::…`.
+- Restore `libalpine.a` as the C artifact while keeping the GHCR image packaging and docs bundle unchanged.
+- Continue shipping docs + artifacts together so release pages always include README/SPEC/docs and the tarball on GHCR.
 
 ## [1.0.6] - 2025-11-30
 - Rename the Rust crate to `alpine-core` and ship it as `alpine-core-1.0.6` so future updates can belong to your organization.
@@ -30,6 +35,7 @@ All notable changes to ALPINE will be documented in this file.
 - ALNP-Stream gating with jitter handling (hold-last, drop, lerp).
 - TypeScript and C bindings scaffolds; Python package stub for clients.
 
+[1.0.7]: https://github.com/alpine-core/Authenticated-Lighting-Protocol/releases/tag/v1.0.7
 [1.0.6]: https://github.com/alpine-core/Authenticated-Lighting-Protocol/releases/tag/v1.0.6
 [1.0.5]: https://github.com/alpine-core/Authenticated-Lighting-Protocol/releases/tag/v1.0.5
 [1.0.4]: https://github.com/alpine-core/Authenticated-Lighting-Protocol/releases/tag/v1.0.4
