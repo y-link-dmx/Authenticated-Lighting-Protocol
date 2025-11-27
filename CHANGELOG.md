@@ -2,6 +2,11 @@
 
 All notable changes to ALPINE will be documented in this file.
 
+## [1.0.6] - 2025-11-30
+- Rename the Rust crate to `alpine-core` and ship it as `alpine-core-1.0.6` so future updates can belong to your organization.
+- Update the static library export to `libalpine-core-*.a` so the C bindings still match the crate name.
+- Keep docs, GHCR C package, and release notes flowing with the new tag.
+
 ## [1.0.5] - 2025-11-29
 - Publish the C tarball as both a release asset and a GHCR package so it’s easy to download/play with.
 - Bundle README, SPEC, and `docs/` into each release asset so the documentation always travels with every package.
@@ -25,6 +30,7 @@ All notable changes to ALPINE will be documented in this file.
 - ALNP-Stream gating with jitter handling (hold-last, drop, lerp).
 - TypeScript and C bindings scaffolds; Python package stub for clients.
 
+[1.0.6]: https://github.com/alpine-core/Authenticated-Lighting-Protocol/releases/tag/v1.0.6
 [1.0.5]: https://github.com/alpine-core/Authenticated-Lighting-Protocol/releases/tag/v1.0.5
 [1.0.4]: https://github.com/alpine-core/Authenticated-Lighting-Protocol/releases/tag/v1.0.4
 [1.0.3]: https://github.com/alpine-core/Authenticated-Lighting-Protocol/releases/tag/v1.0.3

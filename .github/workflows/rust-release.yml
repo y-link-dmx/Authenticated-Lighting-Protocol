@@ -27,7 +27,7 @@ jobs:
           cd src/alnp
           cargo package --allow-dirty --no-verify
           mkdir -p ../../dist/rust
-          cp target/package/alpine-*.crate ../../dist/rust/
+          cp target/package/alpine-core-*.crate ../../dist/rust/
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
