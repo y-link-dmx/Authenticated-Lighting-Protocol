@@ -1,146 +1,110 @@
 # ALPINE Roadmap
 *Authenticated Lighting Protocol*
 
-This roadmap outlines the planned evolution of **ALPINE (ALP)** as a stable, secure, and future-proof real-time lighting protocol.  
-The focus is long-term reliability, predictable behavior, and an ecosystem that scales from small setups to professional installations.
+This roadmap shows where ALPINE is heading, which release will carry each capability, and which phases are already behind us.
 
 ---
 
-## Phase 1 — Core Protocol Foundation (v1.0)
-**Status:** Near-term / Baseline
+## Phase 1 – Core Foundations (v1.0, completed)
+**Status:** ✅ Complete
 
-**Goal:** A rock-solid protocol that behaves correctly on real-world networks.
+**Goal:** Deliver a rock-solid baseline that works on Ethernet and WiFi without special configuration.
 
-- Finalize v1 wire format for:
-    - discovery
-    - handshake
-    - control
-    - streaming
-- Explicit real-time semantics:
-    - late-frame dropping
-    - out-of-order handling
-    - deterministic failure behavior
-- Define **keyframes and delta frames**:
-    - delta always anchored to keyframes
-    - full state recovery guaranteed
-- Transport-agnostic UDP support (Ethernet & WiFi).
-- Clear documentation of:
-    - packet loss behavior
-    - jitter handling
-    - recovery guarantees
-- SDKs expose a **single safe default mode** (`Auto`).
+- Finalized the v1 discovery, handshake, control, and streaming wire formats.
+- Documented loss handling, jitter recovery, and deterministic failure behavior.
+- Published SDK-friendly bindings so `Auto` is the default safe mode for most users.
 
 **Outcome:**  
-ALPINE v1 works reliably without requiring network expertise or special configuration.
+Real deployments now rely on ALPINE v1 with predictable behavior.
 
 ---
 
-## Phase 2 — Stream Profiles & Selectable Behavior
-**Goal:** Let users choose behavior without compromising safety.
+## Phase 2 – Stream Profiles & Selectable Behavior (target v1.2)
+**Status:** In progress
 
-- Introduce **Stream Profiles** as a first-class concept.
-- Provide selectable built-in profiles (e.g. Auto, Realtime, Install).
-- Define strict **profile validation rules** to prevent unsafe combinations.
-- Compile validated profiles into a compact `config_id` used at runtime.
-- Bind stream behavior to session identity for correctness and security.
-- Profiles become immutable once streaming starts.
+**Goal:** Let users choose between safe defaults (Auto), low latency (Realtime), or install-friendly behavior without compromising guarantees.
+
+- Introduce stream profiles as first-class objects with validation and immutable config IDs.
+- Bind profile identity to the session to prevent unsafe runtime swaps.
+- Provide deterministic fallbacks when profiles conflict.
 
 **Outcome:**  
-Behavior is selectable, predictable, and safe by design.
+Operators select predictable behavior tailored to their venue.
 
 ---
 
-## Phase 3 — Adaptive Streaming & Network Resilience
-**Goal:** Make ALPINE feel stable even on poor networks.
+## Phase 3 – Adaptive Streaming & Network Resilience (target v1.3)
+**Status:** Planned
 
-- Runtime detection of:
-    - packet loss
-    - sequence gaps
-    - jitter
-    - late frames
-- Automatic adaptation:
-    - dynamic keyframe frequency
-    - delta encoding enable/disable
-    - adaptive deadlines
-    - optional frame rate scaling
-- Forced keyframes to recover from detected divergence.
-- Optional device-side smoothing and prediction strategies.
+**Goal:** Keep ALPINE stable even when packet loss, jitter, or late frames appear.
+
+- Automatically detect loss, gaps, and jitter and adjust keyframe cadence, delta encoding, and deadlines.
+- Force recovery keyframes and optionally smooth/predict on devices.
+- Provide observability so users understand why quality shifted.
 
 **Outcome:**  
-ALPINE gracefully degrades visual fidelity while preserving correct timing.
+The protocol degrades gracefully while preserving temporal correctness.
 
 ---
 
-## Phase 4 — Custom Profiles & User Preferences
-**Goal:** Enable flexibility for advanced users without breaking guarantees.
+## Phase 4 – Custom Profiles & Preferences (target v1.4)
+**Status:** Planned
 
-- Allow users to define **custom stream profiles**.
-- Profiles expressed as high-level preferences (not low-level flags), such as:
-    - latency sensitivity
-    - smoothness vs responsiveness
-    - resilience vs bandwidth usage
-- All custom profiles are:
-    - validated
-    - normalized
-    - compiled before use
-- Invalid or unsafe profiles are rejected with clear errors.
-- Profiles can be named, reused, and shared.
+**Goal:** Let advanced users express latency/smoothness/resilience preferences without exposing low-level flags.
+
+- Allow naming, validating, and compiling custom profiles expressed as high-level goals.
+- Reject unsafe combinations before they hit the wire; provide clear validation errors.
+- Allow sharing profiles across teams.
 
 **Outcome:**  
-Power users gain control while ALPINE remains deterministic and stable.
+Power users get control while the runtime remains deterministic.
 
 ---
 
-## Phase 5 — Security & Trust Hardening
-**Goal:** Strong security without added complexity.
+## Phase 5 – Security & Trust Hardening (target v1.5)
+**Status:** Planned
 
-- Harden authenticated device identities.
-- Certificate-based identity and session binding.
-- Replay protection across restarts.
-- Optional encrypted payloads for sensitive deployments.
-- Clear, conservative security documentation.
+**Goal:** Harden identities, replay protection, and optional encryption without adding gimmicks.
+
+- Certificate-backed identities and session binding.
+- Replay protection across restarts and optional encrypted payloads for high-security installs.
+- Clear security documentation and conservative defaults.
 
 **Outcome:**  
-Security is built-in, not optional configuration.
+Security is built in, not bolted on.
 
 ---
 
-## Phase 6 — SDKs, Tooling & Developer Experience
-**Goal:** Make ALPINE easy to adopt and easy to debug.
+## Phase 6 – SDKs, Tooling & Developer Experience (v1.11 completed)
+**Status:** ✅ Complete
 
-- First-class SDKs (Rust, TypeScript, C):
-    - opinionated defaults
-    - minimal setup
-- Developer CLI:
-    - profile inspection
-    - session tracing
-    - health and diagnostics
-- Observability surfaces that explain:
-    - why frames are dropped
-    - how the system is adapting
-- Clear examples and reference implementations.
+**Goal:** Make ALPINE the easiest protocol to adopt via SDKs and documentation.
+
+- Added SDK layers for Rust (`src/alnp/src/sdk`), TypeScript (`bindings/ts/src/sdk`), Python (`bindings/python/src/alnp/sdk`), and C++ (`bindings/cpp/sdk/alpine_sdk.hpp`) so developers can call `connect()`, `send_frame()`, `control()`, and keepalive helpers.
+- Position SDKs as the recommended entry points in the README/docs while keeping bindings stable for constrained environments.
+- Embedded validation, docs packaging, and GHCR C packages continue to accompany each release.
 
 **Outcome:**  
-Developers can integrate ALPINE confidently and quickly.
+App developers rely on SDK helpers while embedded or low-level teams interact with the stable bindings.
 
 ---
 
-## Phase 7 — Ecosystem Growth & Future Compatibility
-**Goal:** Enable long-term growth without fragmentation.
+## Phase 7 – Ecosystem Growth & Compatibility (target v2.0)
+**Status:** Planned
 
-- Capability negotiation for future extensions.
-- Vendor-defined extension ranges.
-- Strict backward compatibility guarantees.
-- No breaking changes required to evolve the protocol.
-- Clean upgrade paths for future hardware and software.
+**Goal:** Expand ALPINE safely as the platform grows.
+
+- Introduce capability negotiation and vendor-defined extension ranges.
+- Keep strict backward compatibility guarantees.
+- Establish clean upgrade paths for future hardware and software.
 
 **Outcome:**  
-ALPINE becomes a stable foundation for a growing lighting ecosystem.
+ALPINE becomes a stable foundation everyone can build on.
 
 ---
 
 ## Design Commitment
 
-> **Under packet loss, jitter, or delay, ALPINE degrades visual quality — never temporal correctness.**
+> **Under packet loss, jitter, or delay, ALPINE degrades visual quality—never temporal correctness.**
 
-This principle guides every phase of development.
+This principle guides every phase.
