@@ -47,7 +47,7 @@ jobs:
         run: |
           cd bindings/ts
           pnpm config set '//registry.npmjs.org/:_authToken' "$NPM_TOKEN"
-          pnpm publish --no-git-checks
+          pnpm publish --access public --registry=https://registry.npmjs.org --no-git-checks
       - name: Release notes
         uses: softprops/action-gh-release@v2
         with:
