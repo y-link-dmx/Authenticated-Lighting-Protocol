@@ -12,36 +12,48 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install build deps
+
+      - name: Install build dependencies
         run: |
           python -m pip install -U pip build
+
       - name: Build wheel
         run: |
           cd bindings/python
           python -m build
           mkdir -p ../../dist/python
           cp dist/* ../../dist/python/
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: alnp-python
           path: dist/python
+
       - name: Publish to GitHub Packages
         if: startsWith(github.ref, 'refs/tags/v')
         env:
-          TWINE_USERNAME: "__token__"
+          TWINE_USERNAME: alpine-core
           TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python -m pip install twine
-          twine upload --repository-url https://pypi.pkg.github.com/${{ github.repository_owner }} dist/python/*
+          twine upload \
+            --repository-url https://pypi.pkg.github.com/alpine-core/Authenticated-Lighting-Protocol \
+            dist/python/*
+
       - name: Release notes
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
-        with:
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          generate_release_notes: true
