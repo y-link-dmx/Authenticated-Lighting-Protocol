@@ -75,6 +75,13 @@ Each binding provides:
 
 Use these SDKs as the primary application entry points, and reserve the auto-generated low-level bindings for embedded or constrained contexts.
 
+## Stream Profiles
+
+Stream behavior is selected via the `StreamProfile` abstraction exported by the Rust SDK (`StreamProfile::Auto`, `StreamProfile::Realtime`, `StreamProfile::Install`).
+Each profile represents a declarative intent (safe default, low latency, or install resilience) and compiles into a stable `config_id`.
+Calling `client.start_stream(StreamProfile::Auto)` binds the profile to the session once and never lets the runtime swap it silently; every streaming call thereafter respects the profile weights for latency, resilience, and jitter.
+Expect the SDK to reject invalid combinations and to document the behavioral guarantees for every exposed profile so consumers understand what changes under packet loss, jitter, or timing pressure.
+
 ## Documentation as API contract
 
 ALPINE treats documentation as part of the API contract. Every public surface across Rust, TypeScript/JavaScript, C, C++, and Python must explain not only "how" but "what the system guarantees" under latency, packet loss, and load. See `docs/documentation_policy.md` for the language-by-language requirements (doc comments, JSDoc, Doxygen, docstrings, deprecation paths, behavioral guarantees, etc.).

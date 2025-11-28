@@ -1,0 +1,130 @@
+use sha2::{Digest, Sha256};
+
+/// Declares intent for streaming behavior.
+/// 
+/// The value is emitted into the config ID calculation so runtime decisions stay deterministic.
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StreamIntent {
+    /// Safe default balancing latency and resilience.
+    Auto,
+    /// Low-latency intent; favors quick delivery over smoothing.
+    Realtime,
+    /// Install/resilience intent; favors smoothness over instant updates.
+    Install,
+}
+
+/// Error produced when stream profile parameters fail validation.
+#[derive(Debug, thiserror::Error)]
+pub enum ProfileError {
+    #[error("latency weight must be between 0 and 100 inclusive")]
+    LatencyWeightOutOfRange,
+    #[error("resilience weight must be between 0 and 100 inclusive")]
+    ResilienceWeightOutOfRange,
+    #[error("latency and resilience weights cannot both be zero")]
+    ZeroTotalWeight,
+}
+
+/// High-level description of stream behavior selected by callers.
+///
+/// The profile is immutable and compiles into a concrete runtime configuration.
+#[derive(Debug, Clone)]
+pub struct StreamProfile {
+    intent: StreamIntent,
+    latency_weight: u8,
+    resilience_weight: u8,
+}
+
+impl StreamProfile {
+    /// Returns the safe default profile (Auto).
+    pub fn auto() -> Self {
+        Self {
+            intent: StreamIntent::Auto,
+            latency_weight: 50,
+            resilience_weight: 50,
+        }
+    }
+
+    /// Low-latency profile that prioritizes speedy delivery over smoothing.
+    pub fn realtime() -> Self {
+        Self {
+            intent: StreamIntent::Realtime,
+            latency_weight: 80,
+            resilience_weight: 20,
+        }
+    }
+
+    /// Install profile that prioritizes smoothness and resilience.
+    pub fn install() -> Self {
+        Self {
+            intent: StreamIntent::Install,
+            latency_weight: 25,
+            resilience_weight: 75,
+        }
+    }
+
+    /// Normalizes and compiles the profile into a runtime configuration.
+    ///
+    /// # Guarantees
+    /// * Validates each weight and rejects unsafe combinations with explicit errors.
+    /// * Produces a deterministic `config_id` derived from the normalized weights and intent.
+    pub fn compile(self) -> Result<CompiledStreamProfile, ProfileError> {
+        if self.latency_weight > 100 {
+            return Err(ProfileError::LatencyWeightOutOfRange);
+        }
+        if self.resilience_weight > 100 {
+            return Err(ProfileError::ResilienceWeightOutOfRange);
+        }
+        if self.latency_weight == 0 && self.resilience_weight == 0 {
+            return Err(ProfileError::ZeroTotalWeight);
+        }
+
+        let mut hasher = Sha256::new();
+        hasher.update(&[self.latency_weight, self.resilience_weight]);
+        hasher.update(&[self.intent as u8]);
+        let digest = hasher.finalize();
+        let config_id = digest.iter().map(|byte| format!("{:02x}", byte)).collect();
+
+        Ok(CompiledStreamProfile {
+            intent: self.intent,
+            latency_weight: self.latency_weight,
+            resilience_weight: self.resilience_weight,
+            config_id,
+        })
+    }
+}
+
+/// Deterministic representation of a validated stream profile.
+///
+/// Users consume this via the SDK to bind runtime behavior and inspect `config_id`.
+#[derive(Debug, Clone)]
+pub struct CompiledStreamProfile {
+    intent: StreamIntent,
+    latency_weight: u8,
+    resilience_weight: u8,
+    config_id: String,
+}
+
+impl CompiledStreamProfile {
+    /// Returns the stable config ID representing this profile.
+    pub fn config_id(&self) -> &str {
+        &self.config_id
+    }
+
+    /// Latency weight applied by the runtime.
+    pub fn latency_weight(&self) -> u8 {
+        self.latency_weight
+    }
+
+    /// Resilience weight applied by the runtime.
+    pub fn resilience_weight(&self) -> u8 {
+        self.resilience_weight
+    }
+}
+
+impl Default for StreamProfile {
+    fn default() -> Self {
+        Self::auto()
+    }
+
+}

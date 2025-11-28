@@ -4,20 +4,25 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use thiserror::Error;
 
 use crate::messages::{ChannelFormat, FrameEnvelope, MessageType};
+use crate::profile::CompiledStreamProfile;
 use crate::session::{AlnpSession, JitterStrategy};
 
 /// Minimal transport for sending serialized ALPINE frames (UDP/QUIC left to the caller).
 pub trait FrameTransport: Send + Sync {
+    /// Sends the provided serialized frame.
     fn send_frame(&self, bytes: &[u8]) -> Result<(), String>;
 }
 
+/// Stream state machine used by higher-level clients.
 #[derive(Debug)]
 pub struct AlnpStream<T: FrameTransport> {
     session: AlnpSession,
     transport: T,
     last_frame: parking_lot::Mutex<Option<FrameEnvelope>>,
+    profile: CompiledStreamProfile,
 }
 
+/// Errors emitted from the streaming helper.
 #[derive(Debug, Error)]
 pub enum StreamError {
     #[error("sender not authenticated")]
@@ -31,19 +36,22 @@ pub enum StreamError {
 }
 
 impl<T: FrameTransport> AlnpStream<T> {
-    pub fn new(session: AlnpSession, transport: T) -> Self {
+    /// Builds a new streaming helper bound to a compiled profile.
+    pub fn new(session: AlnpSession, transport: T, profile: CompiledStreamProfile) -> Self {
         Self {
             session,
             transport,
             last_frame: parking_lot::Mutex::new(None),
+            profile,
         }
     }
 
-    pub fn set_jitter_strategy(&self, strat: JitterStrategy) {
-        self.session.set_jitter_strategy(strat);
-    }
-
     /// Sends a streaming frame built from raw channel data.
+    ///
+    /// # Guarantees
+    /// * Only sends when the session is already authenticated and streaming-enabled.
+    /// * Applies jitter strategy derived from the compiled profile; no branching on
+    ///   user-facing preferences happens at this layer.
     pub fn send(
         &self,
         channel_format: ChannelFormat,
@@ -83,7 +91,7 @@ impl<T: FrameTransport> AlnpStream<T> {
     }
 
     fn apply_jitter(&self, channels: &[u16]) -> Vec<u16> {
-        match self.session.jitter_strategy() {
+        match self.jitter_strategy_from_profile() {
             JitterStrategy::HoldLast => {
                 if channels.is_empty() {
                     if let Some(last) = self.last_frame.lock().as_ref() {
@@ -119,5 +127,13 @@ impl<T: FrameTransport> AlnpStream<T> {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_micros() as u64
+    }
+
+    fn jitter_strategy_from_profile(&self) -> JitterStrategy {
+        if self.profile.latency_weight() >= self.profile.resilience_weight() {
+            JitterStrategy::HoldLast
+        } else {
+            JitterStrategy::Lerp
+        }
     }
 }

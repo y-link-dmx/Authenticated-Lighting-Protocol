@@ -15,18 +15,27 @@ use crate::handshake::keepalive;
 use crate::handshake::transport::{CborUdpTransport, TimeoutTransport};
 use crate::handshake::{ChallengeAuthenticator, HandshakeContext, HandshakeError};
 use crate::messages::{CapabilitySet, ChannelFormat, ControlEnvelope, ControlOp, DeviceIdentity, MessageType};
+use crate::profile::{CompiledStreamProfile, StreamProfile};
 use crate::session::{AlnpSession, AlnpRole};
 use crate::stream::{AlnpStream, FrameTransport, StreamError};
 use serde_json::Value;
 use uuid::Uuid;
 
 /// Errors emitted by the high-level SDK client.
+///
+/// These variants indicate what happened during discovery/handshake, streaming,
+/// or UDP transport. They correspond to the guarantees documented on each method.
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum ClientError {
+    /// OS-level failures such as socket bind/send errors or missing session data.
     Io(String),
+    /// Handshake or session establishment failures propagated from `AlnpSession`.
     Handshake(HandshakeError),
+    /// Streaming transport errors (e.g., `AlnpStream::send`).
     Stream(StreamError),
 }
+
 
 impl fmt::Display for ClientError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -79,19 +88,37 @@ impl FrameTransport for UdpFrameTransport {
     }
 }
 
-/// High-level controller client that orchestrates the discovery, handshake, stream,
-/// and keepalive flows.
+/// High-level controller client that orchestrates discovery, handshake, streaming,
+/// control, and keepalive flows.
+///
+/// # Guarantees
+/// * Handshake runs over `TimeoutTransport<CborUdpTransport>` and fails fast.
+/// * Streaming uses a compiled `StreamProfile` and cannot change behavior once active.
+/// * Keepalive tasks start after handshake and abort on `close()`.
+#[derive(Debug)]
 pub struct AlpineClient {
     session: AlnpSession,
     transport: Arc<Mutex<TimeoutTransport<CborUdpTransport>>>,
-    stream: AlnpStream<UdpFrameTransport>,
+    local_addr: SocketAddr,
+    remote_addr: SocketAddr,
+    stream: Option<AlnpStream<UdpFrameTransport>>,
     control: ControlClient,
     keepalive_handle: Option<JoinHandle<()>>,
 }
 
 impl AlpineClient {
     /// Connects to a remote ALPINE device using the provided credentials.
-    pub async fn connect(
+    ///
+    /// # Behavior
+    /// * Executes discovery/handshake via `CborUdpTransport` and `TimeoutTransport`.
+    /// * Spins up a keepalive future that ticks every 5 seconds.
+    /// * Builds `ControlClient` once keys are derived so `control_envelope` works.
+    ///
+    /// # Errors
+    /// Returns `ClientError::Io` for socket failures or missing session material,
+    /// `ClientError::Handshake` for protocol errors, and `ClientError::Stream` for
+    /// transport issues.
+   pub async fn connect(
         local_addr: SocketAddr,
         remote_addr: SocketAddr,
         identity: DeviceIdentity,
@@ -123,9 +150,6 @@ impl AlpineClient {
                 .session_id,
         ));
 
-        let stream_socket = UdpFrameTransport::new(local_addr, remote_addr)?;
-        let stream = AlnpStream::new(session.clone(), stream_socket);
-
         let established = session
             .established()
             .ok_or_else(|| ClientError::Io("session missing after handshake".into()))?;
@@ -141,13 +165,53 @@ impl AlpineClient {
         Ok(Self {
             session,
             transport,
-            stream,
+            local_addr,
+            remote_addr,
+            stream: None,
             control,
             keepalive_handle: Some(keepalive_handle),
         })
     }
 
+    /// Starts streaming with the selected profile; `Auto` is the default.
+    ///
+    /// # Guarantees
+    /// * Profiles are validated/normalized; invalid combinations return explicit errors.
+    /// * `config_id` is bound to the session and can't change once streaming begins.
+    /// * Streaming transport is built after the profile is locked.
+    ///
+    /// # Errors
+    /// Returns `ClientError::Io` for socket issues or session material that is missing.
+    /// Returns `ClientError::Handshake` if the profile cannot be bound or the session rejects it.
+    #[must_use]
+    pub async fn start_stream(
+        &mut self,
+        profile: StreamProfile,
+    ) -> Result<String, ClientError> {
+        let compiled = profile
+            .compile()
+            .map_err(|err| HandshakeError::Protocol(err.to_string()))?;
+        self.session
+            .set_stream_profile(compiled.clone())
+            .map_err(ClientError::Handshake)?;
+        self.session.mark_streaming();
+
+        let stream_socket = UdpFrameTransport::new(self.local_addr, self.remote_addr)?;
+        let stream = AlnpStream::new(self.session.clone(), stream_socket, compiled.clone());
+        self.stream = Some(stream);
+        Ok(compiled.config_id().to_string())
+    }
+
     /// Sends a streaming frame via the high-level helper.
+    ///
+    /// # Guarantees
+    /// * Validation reuses `AlnpStream`, so it refuses to send when the session is not ready.
+    /// * Applies jitter strategy before encoding.
+    /// * Requires `start_stream` to have bound a profile before calling.
+    ///
+    /// # Errors
+    /// Returns `StreamError` wrapped in `ClientError::Stream`.
+    #[must_use]
     pub fn send_frame(
         &self,
         channel_format: ChannelFormat,
@@ -156,12 +220,20 @@ impl AlpineClient {
         groups: Option<HashMap<String, Vec<u16>>>,
         metadata: Option<HashMap<String, serde_json::Value>>,
     ) -> Result<(), ClientError> {
-        self.stream
+        let stream = self
+            .stream
+            .as_ref()
+            .ok_or_else(|| ClientError::Io("stream not started".into()))?;
+        stream
             .send(channel_format, channels, priority, groups, metadata)
             .map_err(ClientError::from)
     }
 
     /// Gracefully closes the client, stopping keepalive tasks.
+    ///
+    /// # Behavior
+    /// * Transitions the session state to closed.
+    /// * Aborts the keepalive background job immediately.
     pub async fn close(mut self) {
         self.session.close();
         if let Some(handle) = self.keepalive_handle.take() {
@@ -170,6 +242,14 @@ impl AlpineClient {
     }
 
     /// Builds an authenticated control envelope ready for transport.
+    ///
+    /// # Guarantees
+    /// * Seals the payload with a MAC derived from the session keys.
+    /// * Does not mutate transport state.
+    ///
+    /// # Errors
+    /// Propagates the underlying `HandshakeError` returned while computing MACs.
+    #[must_use]
     pub fn control_envelope(
         &self,
         seq: u64,

@@ -10,6 +10,7 @@ use crate::handshake::{
     HandshakeError, HandshakeOutcome, HandshakeParticipant, HandshakeTransport,
 };
 use crate::messages::{CapabilitySet, DeviceIdentity, SessionEstablished};
+use crate::profile::{CompiledStreamProfile, StreamProfile};
 
 pub mod state;
 use state::{SessionState, SessionStateError};
@@ -43,6 +44,8 @@ pub struct AlnpSession {
     timeout: Duration,
     session_established: Arc<Mutex<Option<SessionEstablished>>>,
     session_keys: Arc<Mutex<Option<SessionKeys>>>,
+    compiled_profile: Arc<Mutex<Option<CompiledStreamProfile>>>,
+    profile_locked: Arc<Mutex<bool>>,
 }
 
 impl AlnpSession {
@@ -56,6 +59,8 @@ impl AlnpSession {
             timeout: Duration::from_secs(10),
             session_established: Arc::new(Mutex::new(None)),
             session_keys: Arc::new(Mutex::new(None)),
+            compiled_profile: Arc::new(Mutex::new(None)),
+            profile_locked: Arc::new(Mutex::new(false)),
         }
     }
 
@@ -108,6 +113,52 @@ impl AlnpSession {
         Ok(())
     }
 
+    /// Sets the stream profile that determines runtime behavior.
+    ///
+    /// This method locks the profile until streaming begins to enforce immutability.
+    pub fn set_stream_profile(
+        &self,
+        profile: CompiledStreamProfile,
+    ) -> Result<(), HandshakeError> {
+        let mut locked = self
+            .profile_locked
+            .lock()
+            .map_err(|_| HandshakeError::Protocol("profile lock poisoned".into()))?;
+        if *locked {
+            return Err(HandshakeError::Protocol(
+                "stream profile cannot be changed after streaming starts".into(),
+            ));
+        }
+        let mut compiled = self
+            .compiled_profile
+            .lock()
+            .map_err(|_| HandshakeError::Protocol("compiled profile lock poisoned".into()))?;
+        *compiled = Some(profile);
+        Ok(())
+    }
+
+    /// Returns the bound profile's config ID, if set.
+    ///
+    /// The `config_id` is computed from the normalized profile and never changes.
+    #[must_use]
+    pub fn profile_config_id(&self) -> Option<String> {
+        self.compiled_profile
+            .lock()
+            .ok()
+            .and_then(|guard| guard.clone().map(|profile| profile.config_id().to_string()))
+    }
+
+    /// Retrieves the compiled profile, if configured.
+    ///
+    /// Once streaming starts this returns the same object that controls runtime behavior.
+    #[must_use]
+    pub fn compiled_profile(&self) -> Option<CompiledStreamProfile> {
+        self.compiled_profile
+            .lock()
+            .ok()
+            .and_then(|guard| guard.clone())
+    }
+
     pub fn set_jitter_strategy(&self, strat: JitterStrategy) {
         if let Ok(mut j) = self.jitter.lock() {
             *j = strat;
@@ -156,6 +207,9 @@ impl AlnpSession {
                     })
                     .map(|next| *state = next);
             }
+        }
+        if let Ok(mut locked) = self.profile_locked.lock() {
+            *locked = true;
         }
     }
 
