@@ -1,0 +1,10 @@
+[package]
+name = "alpine-protocol-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "High-level SDK on top of the ALPINE bindings."
+authors = ["alpine-core"]
+license = "Apache-2.0"
+
+[dependencies]
+alpine-protocol-rs = { path = "../../bindings/rust/alpine-protocol-rs" }

@@ -1,0 +1,7 @@
+[project]
+name = "alpine-sdk"
+version = "0.1.0"
+description = "High-level ALPINE Python SDK depending on the bindings."
+authors = ["alpine-core"]
+dependencies = ["alpine-protocol @ file:../../bindings/python"]
+requires-python = ">=3.10"
