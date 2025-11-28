@@ -101,6 +101,11 @@ impl StreamProfile {
             config_id,
         })
     }
+
+    /// Returns the declared intent of the profile (Auto/Realtime/Install).
+    pub fn intent(&self) -> StreamIntent {
+        self.intent
+    }
 }
 
 /// Deterministic representation of a validated stream profile.

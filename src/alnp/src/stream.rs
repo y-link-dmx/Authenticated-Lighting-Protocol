@@ -1,7 +1,9 @@
+use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use thiserror::Error;
+use tracing::{info, warn};
 
 use crate::messages::{ChannelFormat, FrameEnvelope, MessageType};
 use crate::profile::CompiledStreamProfile;
@@ -20,6 +22,7 @@ pub struct AlnpStream<T: FrameTransport> {
     transport: T,
     last_frame: parking_lot::Mutex<Option<FrameEnvelope>>,
     profile: CompiledStreamProfile,
+    recovery: parking_lot::Mutex<RecoveryMonitor>,
 }
 
 /// Errors emitted from the streaming helper.
@@ -35,6 +38,14 @@ pub enum StreamError {
     MissingSession,
 }
 
+mod network;
+
+pub use network::{NetworkConditions, NetworkMetrics};
+
+mod recovery;
+
+pub use recovery::{RecoveryEvent, RecoveryMonitor, RecoveryReason};
+
 impl<T: FrameTransport> AlnpStream<T> {
     /// Builds a new streaming helper bound to a compiled profile.
     pub fn new(session: AlnpSession, transport: T, profile: CompiledStreamProfile) -> Self {
@@ -43,6 +54,7 @@ impl<T: FrameTransport> AlnpStream<T> {
             transport,
             last_frame: parking_lot::Mutex::new(None),
             profile,
+            recovery: parking_lot::Mutex::new(RecoveryMonitor::new()),
         }
     }
 
@@ -69,6 +81,7 @@ impl<T: FrameTransport> AlnpStream<T> {
         }
 
         let adjusted_channels = self.apply_jitter(&channels);
+        let metadata = self.attach_recovery_metadata(metadata);
 
         let envelope = FrameEnvelope {
             message_type: MessageType::AlpineFrame,
@@ -88,6 +101,51 @@ impl<T: FrameTransport> AlnpStream<T> {
             .map_err(StreamError::Transport)?;
         *self.last_frame.lock() = Some(envelope);
         Ok(())
+    }
+
+    /// Updates recovery state based on observed network conditions.
+    pub fn observe_network_conditions(&self, conditions: &NetworkConditions) {
+        let mut monitor = self.recovery.lock();
+        if let Some(event) = monitor.feed(conditions) {
+            match event {
+                RecoveryEvent::RecoveryStarted(reason) => warn!(
+                    target: "alpine::recovery",
+                    reason = reason.as_str(),
+                    "recovery started due to {}",
+                    reason.as_str()
+                ),
+                RecoveryEvent::RecoveryComplete(reason) => info!(
+                    target: "alpine::recovery",
+                    reason = reason.as_str(),
+                    "recovery complete for {}",
+                    reason.as_str()
+                ),
+            }
+        }
+    }
+
+    fn attach_recovery_metadata(
+        &self,
+        metadata: Option<HashMap<String, Value>>,
+    ) -> Option<HashMap<String, Value>> {
+        let reason = {
+            let monitor = self.recovery.lock();
+            monitor.active_reason()
+        };
+
+        if let Some(reason) = reason {
+            let mut map = metadata.unwrap_or_default();
+            map.insert(
+                "alpine_recovery".to_string(),
+                json!({
+                    "phase": "recovery",
+                    "reason": reason.as_str(),
+                }),
+            );
+            Some(map)
+        } else {
+            metadata
+        }
     }
 
     fn apply_jitter(&self, channels: &[u16]) -> Vec<u16> {
