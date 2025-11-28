@@ -2,16 +2,30 @@
 
 All notable changes to ALPINE will be documented in this file.
 
+<<<<<<< HEAD
 - ## [Unreleased] - Phase 3.1–3.2 (Detection + Recovery)
 - Introduce deterministic `NetworkConditions` metrics (loss ratio, late frame rate, jitter) so every session can observe per-stream network health without adaptive behavior.
 - Add regression tests proving the metrics stay deterministic when sequences miss, deadlines slip, or intervals vary.
 - Ship a deterministic `RecoveryMonitor` that starts/completes recovery on sustained or burst loss and annotates retransmitted frames with observable metadata so forced keyframes signal their intent without rewinding the timeline.
 - Implement Phase 3.3.1’s pure adaptation core (deterministic state + decision engine) scoped to keyframe cadence, delta depth, and deadlines, and record its state without integrating yet.
 - Begin Phase 3.3.2 by wiring that engine into the streaming path: network + recovery drive `AdaptationState`, and each frame carries the resulting metadata (`alpine_adaptation` plus keyframe flag).
+=======
+## [1.2.3] - 2025-11-29
+- Add `sdk::DiscoveryClient` so discovery is stateless, explicit, and surfaces identity/address/capabilities along with a signed flag.
+- Clarify the README workflow (DiscoveryClient -> AlpineClient::connect -> start_stream -> send_frame) and highlight the new pre-session guarantee.
+- Improve `ClientError` diagnostics so discovery/handshake failures preserve their concrete causes.
+>>>>>>> 7739d68 (feat: add sdk discovery assistant)
 
 ## [1.2.2] - 2025-11-28
 - Added regression tests covering profile validation failures, deterministic `config_id`, and the immutability guarantee once streaming begins.
 - Hardened the embedded build script so it runs `build_c.sh` first and links against `libalpine-<version>.a`, enabling the `embedded` workflow to pass.
+
+## [Unreleased] - Phase 3.1–3.2 (Detection + Recovery)
+- Introduce deterministic `NetworkConditions` metrics (loss ratio, late frame rate, jitter) so every session can observe per-stream network health without adaptive behavior.
+- Add regression tests proving the metrics stay deterministic when sequences miss, deadlines slip, or intervals vary.
+- Ship a deterministic `RecoveryMonitor` that starts/completes recovery on sustained or burst loss and annotates retransmitted frames with observable metadata so forced keyframes signal their intent without rewinding the timeline.
+- Introduce Phase 3.3.1's pure adaptation core (deterministic state + decision engine) that governs keyframe cadence, delta depth, and deadline offsets, and records its state without integration yet.
+- Begin Phase 3.3.2 by wiring the adaptation state into the streaming path: network + recovery update `AdaptationState`, and every frame carries `alpine_adaptation` metadata plus a keyframe flag.
 
 ## [1.2.1] - 2025-11-28
 - Introduce language-specific SDK layers (`src/alnp/src/sdk`, `bindings/ts/src/sdk`, `bindings/python/src/alnp/sdk`, `bindings/cpp/sdk`) with ergonomic APIs (`connect`, `send_frame`, `control`, keepalive) that now select stream profiles.
@@ -38,7 +52,7 @@ All notable changes to ALPINE will be documented in this file.
 ## [1.0.7] - 2025-11-27
 - Keep the crate name `alpine-core` for crates.io while exposing the library as `alpine` so existing tests and consumers can still import `alpine::...`.
 - Restore `libalpine.a` as the C artifact while keeping the GHCR image packaging and docs bundle unchanged.
-- Continue shipping docs + artifacts together so release pages always include README/SPEC/docs and the tarball on GHCR.
+- Continue shipping docs + artifacts together so every release always includes README/SPEC/docs and the tarball on GHCR.
 
 ## [1.0.6] - 2025-11-27
 - Rename the Rust crate to `alpine-core` and ship it as `alpine-core-1.0.6` so future updates belong to the alpine-core organization.

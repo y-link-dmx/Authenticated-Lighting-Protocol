@@ -82,6 +82,15 @@ Each binding provides:
 
 These SDKs are the *recommended* application entry points across languages. They orchestrate discovery, handshake, streaming, and keepalive workflows while reusing the underlying binding helpers. Reserve the auto-generated bindings for embedded / constrained environments where the SDK layer cannot run (e.g., ESP32 builds, C-only systems, or highly controlled runtimes).
 
+## Discovery-first SDK workflow
+
+1. Create an `sdk::DiscoveryClient` with your local bind address, broadcast address, requested capabilities, and (optionally) a verifier if you already know the device’s public key.
+2. Call `DiscoveryClient::discover().await` to receive a list of deterministic `DiscoveredDevice` entries (addr, `DeviceIdentity`, `CapabilitySet`, and a `signed` flag that notes whether the reply was authenticated).
+3. Choose a target device and call `sdk::AlpineClient::connect` with the advertised identity/capabilities.
+4. Continue through `start_stream` → `send_frame`, keeping streaming logic contained inside `AlpineClient` and picking `StreamProfile` explicitly.
+
+Discovery now lives entirely outside the session state: the client never auto-connects, never caches results silently, and surfaces every failure so you can explain what happened before choosing a target.
+
 ## Stream Profiles
 
 Stream behavior is selected via the `StreamProfile` abstraction exported by the Rust SDK (`StreamProfile::Auto`, `StreamProfile::Realtime`, `StreamProfile::Install`).
