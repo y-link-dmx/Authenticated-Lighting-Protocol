@@ -18,6 +18,7 @@ use alpine::messages::{
 };
 use alpine::session::{AlnpSession, JitterStrategy, StaticKeyAuthenticator};
 use alpine::stream::{AlnpStream, FrameTransport};
+use alpine::profile::StreamProfile;
 
 /// Simple transport bridge used to run two handshake participants in tests.
 struct PipeTransport {
@@ -176,7 +177,8 @@ async fn streaming_frames_hold_last_when_requested() {
     let (controller, _) = create_sessions().await;
     controller.set_jitter_strategy(JitterStrategy::HoldLast);
     let transport = RecordingTransport::new();
-    let stream = AlnpStream::new(controller.clone(), transport.clone());
+    let profile = StreamProfile::auto().compile().unwrap();
+    let stream = AlnpStream::new(controller.clone(), transport.clone(), profile);
     stream
         .send(ChannelFormat::U8, vec![10, 20], 5, None, None)
         .unwrap();

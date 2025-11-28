@@ -120,7 +120,7 @@ impl AlnpSession {
         &self,
         profile: CompiledStreamProfile,
     ) -> Result<(), HandshakeError> {
-        let mut locked = self
+        let locked = self
             .profile_locked
             .lock()
             .map_err(|_| HandshakeError::Protocol("profile lock poisoned".into()))?;

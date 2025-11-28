@@ -13,10 +13,10 @@ use crate::crypto::X25519KeyExchange;
 use crate::control::{ControlClient, ControlCrypto};
 use crate::handshake::keepalive;
 use crate::handshake::transport::{CborUdpTransport, TimeoutTransport};
-use crate::handshake::{ChallengeAuthenticator, HandshakeContext, HandshakeError};
-use crate::messages::{CapabilitySet, ChannelFormat, ControlEnvelope, ControlOp, DeviceIdentity, MessageType};
+use crate::handshake::{HandshakeContext, HandshakeError};
+use crate::messages::{CapabilitySet, ChannelFormat, ControlEnvelope, ControlOp, DeviceIdentity};
 use crate::profile::{CompiledStreamProfile, StreamProfile};
-use crate::session::{AlnpSession, AlnpRole};
+use crate::session::AlnpSession;
 use crate::stream::{AlnpStream, FrameTransport, StreamError};
 use serde_json::Value;
 use uuid::Uuid;
@@ -66,6 +66,7 @@ impl From<std::io::Error> for ClientError {
 }
 
 /// Thin UDP transport for the ALPINE streaming layer.
+#[derive(Debug)]
 struct UdpFrameTransport {
     socket: StdUdpSocket,
     peer: SocketAddr,

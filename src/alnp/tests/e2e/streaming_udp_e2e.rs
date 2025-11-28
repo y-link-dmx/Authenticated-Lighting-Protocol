@@ -6,6 +6,7 @@ use tokio::net::UdpSocket;
 
 use alpine::messages::{ChannelFormat, FrameEnvelope, MessageType};
 use alpine::session::JitterStrategy;
+use alpine::profile::StreamProfile;
 use alpine::stream::{AlnpStream, FrameTransport};
 
 use alpine::e2e_common::run_udp_handshake;
@@ -40,7 +41,8 @@ async fn streaming_udp_e2e_phase3() -> Result<(), Box<dyn Error>> {
     let receiver_addr = receiver_socket.local_addr()?;
 
     let transport = UdpFrameTransport::new(stream_socket, receiver_addr);
-    let stream = AlnpStream::new(controller_session.clone(), transport);
+    let profile = StreamProfile::auto().compile().unwrap();
+    let stream = AlnpStream::new(controller_session.clone(), transport, profile);
 
     let receiver_task = tokio::spawn(async move {
         let mut frames = Vec::with_capacity(2);

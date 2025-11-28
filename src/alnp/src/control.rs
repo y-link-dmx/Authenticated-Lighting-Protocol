@@ -8,6 +8,7 @@ use serde_json::json;
 use uuid::Uuid;
 
 /// Signs and verifies control envelopes using the derived session keys.
+#[derive(Debug)]
 pub struct ControlCrypto {
     keys: SessionKeys,
 }
@@ -49,6 +50,7 @@ impl ControlCrypto {
 }
 
 /// Control-plane client helper to build authenticated envelopes and handle acks.
+#[derive(Debug)]
 pub struct ControlClient {
     pub device_id: Uuid,
     pub crypto: ControlCrypto,

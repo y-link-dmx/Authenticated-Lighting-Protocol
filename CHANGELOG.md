@@ -2,6 +2,9 @@
 
 All notable changes to ALPINE will be documented in this file.
 
+## [1.2.1] - 2025-12-06
+- Added regression tests covering profile validation failures, deterministic `config_id`, and the immutability guarantee once streaming begins.
+- Completed Phase 2 release hygiene with version `1.2.1`, updated binding docs, and the documentation-policy manifesto.
 ## [1.2.0] - 2025-12-04
 - Introduce language-specific SDK layers (`src/alnp/src/sdk`, `bindings/ts/src/sdk`, `bindings/python/src/alnp/sdk`, `bindings/cpp/sdk`) with ergonomic APIs (`connect`, `send_frame`, `control`, keepalive) that now select stream profiles.
 - Add Stream Profiles (Auto/Realtime/Install) that compile into deterministic `config_id`s, validate weights, and cannot be changed once streaming starts; `start_stream` binds the profile.

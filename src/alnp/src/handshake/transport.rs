@@ -9,6 +9,7 @@ use super::{HandshakeError, HandshakeMessage, HandshakeTransport};
 use crate::messages::{Acknowledge, ControlEnvelope};
 
 /// CBOR-over-UDP transport for handshake and control-plane exchange.
+#[derive(Debug)]
 pub struct CborUdpTransport {
     socket: UdpSocket,
     peer: SocketAddr,
@@ -61,6 +62,7 @@ impl HandshakeTransport for CborUdpTransport {
 }
 
 /// Wrapper that enforces per-message timeouts on recv.
+#[derive(Debug)]
 pub struct TimeoutTransport<T> {
     inner: T,
     recv_timeout: Duration,
