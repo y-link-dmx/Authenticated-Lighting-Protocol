@@ -33,7 +33,7 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ff85e27c-4996-4f6d-98b9-5e53e1a5c90d" name="Changes" comment="chore: bump all protocol versions to 2.0.12" />
+    <list default="true" id="ff85e27c-4996-4f6d-98b9-5e53e1a5c90d" name="Changes" comment="chore(ci): refine comments and ensure pnpm availability in TypeScript SDK workflow" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -379,7 +379,49 @@
       <option name="presentableId" value="LOCAL−00013" />
       <updated>1764441350713</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL−00014" summary="chore(ci): update Node.js workflow to use proper pnpm configuration and cache setup">
+      <option name="closed" value="true" />
+      <created>1764443008882</created>
+      <option name="number" value="LOCAL−00014" />
+      <option name="presentableId" value="LOCAL−00014" />
+      <updated>1764443008882</updated>
+    </task>
+    <task id="LOCAL−00015" summary="chore(ci): add manual trigger and refine conditions for TypeScript SDK publishing">
+      <option name="closed" value="true" />
+      <created>1764443084778</created>
+      <option name="number" value="LOCAL−00015" />
+      <option name="presentableId" value="LOCAL−00015" />
+      <updated>1764443084778</updated>
+    </task>
+    <task id="LOCAL−00016" summary="chore(ci): update comment formatting in TypeScript SDK publish workflow">
+      <option name="closed" value="true" />
+      <created>1764443106445</created>
+      <option name="number" value="LOCAL−00016" />
+      <option name="presentableId" value="LOCAL−00016" />
+      <updated>1764443106445</updated>
+    </task>
+    <task id="LOCAL−00017" summary="chore(ci): add cache-dependency-path for pnpm in TypeScript SDK workflow">
+      <option name="closed" value="true" />
+      <created>1764443166331</created>
+      <option name="number" value="LOCAL−00017" />
+      <option name="presentableId" value="LOCAL−00017" />
+      <updated>1764443166331</updated>
+    </task>
+    <task id="LOCAL−00018" summary="chore(ci): cleanup comments and optimize setup in TypeScript SDK workflow">
+      <option name="closed" value="true" />
+      <created>1764443220202</created>
+      <option name="number" value="LOCAL−00018" />
+      <option name="presentableId" value="LOCAL−00018" />
+      <updated>1764443220202</updated>
+    </task>
+    <task id="LOCAL−00019" summary="chore(ci): refine comments and ensure pnpm availability in TypeScript SDK workflow">
+      <option name="closed" value="true" />
+      <created>1764443277536</created>
+      <option name="number" value="LOCAL−00019" />
+      <option name="presentableId" value="LOCAL−00019" />
+      <updated>1764443277536</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -416,7 +458,13 @@
     <MESSAGE value="Refactor Python release workflow: rename job, adjust permissions, streamline steps, and use OIDC for PyPI publishing." />
     <MESSAGE value="chore: bump all protocol versions to 2.0.11" />
     <MESSAGE value="chore: bump all protocol versions to 2.0.12" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: bump all protocol versions to 2.0.12" />
+    <MESSAGE value="chore(ci): update Node.js workflow to use proper pnpm configuration and cache setup" />
+    <MESSAGE value="chore(ci): add manual trigger and refine conditions for TypeScript SDK publishing" />
+    <MESSAGE value="chore(ci): update comment formatting in TypeScript SDK publish workflow" />
+    <MESSAGE value="chore(ci): add cache-dependency-path for pnpm in TypeScript SDK workflow" />
+    <MESSAGE value="chore(ci): cleanup comments and optimize setup in TypeScript SDK workflow" />
+    <MESSAGE value="chore(ci): refine comments and ensure pnpm availability in TypeScript SDK workflow" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore(ci): refine comments and ensure pnpm availability in TypeScript SDK workflow" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
