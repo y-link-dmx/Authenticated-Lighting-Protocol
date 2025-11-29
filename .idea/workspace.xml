@@ -33,7 +33,9 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ff85e27c-4996-4f6d-98b9-5e53e1a5c90d" name="Changes" comment="chore(ci): refine comments and ensure pnpm availability in TypeScript SDK workflow" />
+    <list default="true" id="ff85e27c-4996-4f6d-98b9-5e53e1a5c90d" name="Changes" comment="chore(ci): add manual trigger and refine conditions for Python SDK publishing">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -421,7 +423,14 @@
       <option name="presentableId" value="LOCAL−00019" />
       <updated>1764443277536</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL−00020" summary="chore(ci): add manual trigger and refine conditions for Python SDK publishing">
+      <option name="closed" value="true" />
+      <created>1764444977196</created>
+      <option name="number" value="LOCAL−00020" />
+      <option name="presentableId" value="LOCAL−00020" />
+      <updated>1764444977196</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -464,7 +473,9 @@
     <MESSAGE value="chore(ci): add cache-dependency-path for pnpm in TypeScript SDK workflow" />
     <MESSAGE value="chore(ci): cleanup comments and optimize setup in TypeScript SDK workflow" />
     <MESSAGE value="chore(ci): refine comments and ensure pnpm availability in TypeScript SDK workflow" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore(ci): refine comments and ensure pnpm availability in TypeScript SDK workflow" />
+    <MESSAGE value="chore(deps): update @alpine-core/protocol to ^2.0.12 in TypeScript SDK" />
+    <MESSAGE value="chore(ci): add manual trigger and refine conditions for Python SDK publishing" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore(ci): add manual trigger and refine conditions for Python SDK publishing" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
