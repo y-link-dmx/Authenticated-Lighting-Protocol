@@ -22,22 +22,20 @@ jobs:
        github.event.workflow_run.conclusion == 'success')
 
     steps:
-      # ✅ Checkout the EXACT commit that triggered the run
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
-      # ✅ Single setup-node with pnpm cache
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: sdk/ts/pnpm-lock.yaml
 
+      # ✅ pnpm MUST EXIST BEFORE ANYTHING TRIES TO USE IT
       - name: Enable pnpm via Corepack
         run: |
           corepack enable
           corepack prepare pnpm@8.15.4 --activate
+          pnpm --version
 
       - name: Install dependencies
         run: |
