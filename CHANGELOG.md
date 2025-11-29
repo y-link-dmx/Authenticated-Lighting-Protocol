@@ -4,7 +4,7 @@ All notable changes to ALPINE will be documented in this file.
 
 ## [Unreleased] - Phase 0 (Modular architecture split & release)
 - Move `alpine-protocol-rs` under `protocol/rust/` and keep the crate focused on wire helpers, crypto primitives, and stream profiles. `AlpineClient` now lives entirely in `sdk/rust/alpine-protocol-sdk`.
-- Introduce `protocol-publish.yml` and `sdk-publish.yml`, version the protocol artifacts for `v2.0.16`, and let every SDK release follow its own semantic version set (the Rust SDK is `0.1.4` for this cycle).
+- Introduce `protocol-publish.yml` and `sdk-publish.yml`, version the protocol artifacts for `v2.0.17`, and let every SDK release follow its own semantic version set (the Rust SDK is `0.1.5` for this cycle).
 - Document the split in the README, roadmap, and release process so contributors understand the release boundaries (protocol layer for stability, SDKs for ergonomics).
 - Align the tooling so the protocol layer publishes first and SDKs run afterwards against the freshly published artifacts while keeping Phase 2 guarantees frozen.
 
