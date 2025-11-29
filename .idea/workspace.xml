@@ -33,7 +33,7 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ff85e27c-4996-4f6d-98b9-5e53e1a5c90d" name="Changes" comment="chore: bump all protocol versions to 2.0.11" />
+    <list default="true" id="ff85e27c-4996-4f6d-98b9-5e53e1a5c90d" name="Changes" comment="chore: bump all protocol versions to 2.0.12" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -372,7 +372,14 @@
       <option name="presentableId" value="LOCAL−00012" />
       <updated>1764440914145</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL−00013" summary="chore: bump all protocol versions to 2.0.12">
+      <option name="closed" value="true" />
+      <created>1764441350713</created>
+      <option name="number" value="LOCAL−00013" />
+      <option name="presentableId" value="LOCAL−00013" />
+      <updated>1764441350713</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -408,7 +415,8 @@
     <MESSAGE value="Refactor GitHub Actions workflow, adjust Python artifact handling, and fix C++ discovery request logic." />
     <MESSAGE value="Refactor Python release workflow: rename job, adjust permissions, streamline steps, and use OIDC for PyPI publishing." />
     <MESSAGE value="chore: bump all protocol versions to 2.0.11" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: bump all protocol versions to 2.0.11" />
+    <MESSAGE value="chore: bump all protocol versions to 2.0.12" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: bump all protocol versions to 2.0.12" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -11,37 +11,51 @@ jobs:
   ts-sdk:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
+
+      # Node WITHOUT pnpm cache yet
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      # ✅ Enable pnpm properly
+      - name: Enable pnpm via Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@8.15.4 --activate
+
+      # Optional but recommended: pnpm cache AFTER pnpm exists
+      - name: Configure pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
           cache: "pnpm"
-      - name: Enable pnpm
-        run: corepack enable pnpm
+
       - name: Install dependencies
         run: |
           cd sdk/ts
-          pnpm install
+          pnpm install --frozen-lockfile
+
       - name: Type-check
         run: |
           cd sdk/ts
-          pnpm exec tsc --project tsconfig.json --noEmit
+          pnpm exec tsc --noEmit
+
       - name: Build SDK
         run: |
           cd sdk/ts
           pnpm run build
+
       - name: Publish TypeScript SDK
-        if: github.event.workflow_run.conclusion == 'success' &&
-          startsWith(github.event.workflow_run.ref, 'refs/tags/v')
+        if: startsWith(github.event.workflow_run.ref, 'refs/tags/v')
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          PNPM_TOKEN: ${{ secrets.PNPM_TOKEN }}
         run: |
           cd sdk/ts
-          if [ -n "$NPM_TOKEN" ]; then
-            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-          elif [ -n "$PNPM_TOKEN" ]; then
-            echo "//registry.npmjs.org/:_authToken=${PNPM_TOKEN}" > .npmrc
-          fi
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           pnpm publish --access public --no-git-checks
