@@ -47,7 +47,7 @@ jobs:
             echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           fi
           npm publish --access public
-      - name: Publish Python bindings
+      - name: Publish Python protocol helpers
         if: startsWith(github.ref, 'refs/tags/v')
         env:
           TWINE_USERNAME: "__token__"
@@ -55,4 +55,4 @@ jobs:
         run: |
           python -m pip install --upgrade twine
           cd dist/python
-          twine upload --non-interactive *.whl *.tar.gz
+          twine upload --non-interactive dist/*
