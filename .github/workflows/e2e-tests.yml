@@ -21,7 +21,7 @@ jobs:
           override: true
 
       - name: Run UDP E2E tests
-        working-directory: bindings/rust/alpine-protocol-rs
+        working-directory: protocol/rust/alpine-protocol-rs
         env:
           RUST_BACKTRACE: full
         run: cargo test --tests -- --ignored
