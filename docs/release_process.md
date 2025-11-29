@@ -14,7 +14,7 @@ Each release cycle follows this checklist:
    - Run `scripts/build_ts.sh` and `scripts/build_python.sh` to produce the publishable bundles for the TypeScript and Python protocol helpers.
 
 2. **Tag the protocol release**
-   - Create a tag such as `v2.0.2` and push it to trigger `protocol-publish`.
+   - Create a tag such as `v2.0.3` and push it to trigger `protocol-publish`.
    - The workflow tests, packages, and publishes every protocol artifact to crates.io, npm, PyPI, and GitHub Packages.
 
 3. **Publish the SDK**
