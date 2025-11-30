@@ -1,13 +1,13 @@
 [package]
 name = "alpine-protocol-sdk"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 description = "High-level SDK on top of the ALPINE protocol layer."
 authors = ["alpine-core"]
 license = "Apache-2.0"
 
 [dependencies]
-alpine-protocol-rs = "2.0.17"
+alpine-protocol-rs = "2.0.18"
 rand = "0.8"
 serde_cbor = "0.11"
 serde_json = "1.0"

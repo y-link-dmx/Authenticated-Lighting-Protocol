@@ -1,6 +1,6 @@
 {
   "name": "@alpine-core/protocol",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "description": "TypeScript protocol helpers for the Authenticated Lighting Network Protocol.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

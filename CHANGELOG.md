@@ -2,9 +2,9 @@
 
 All notable changes to ALPINE will be documented in this file.
 
-## [Unreleased] - Phase 0 (Modular architecture split & release)
+-## [Unreleased] - Phase 0 (Modular architecture split & release)
 - Move `alpine-protocol-rs` under `protocol/rust/` and keep the crate focused on wire helpers, crypto primitives, and stream profiles. `AlpineClient` now lives entirely in `sdk/rust/alpine-protocol-sdk`.
-- Introduce `protocol-publish.yml` and `sdk-publish.yml`, version the protocol artifacts for `v2.0.17`, and let every SDK release follow its own semantic version set (the Rust SDK is `0.1.5` for this cycle).
+- Introduce `protocol-publish.yml` and `sdk-publish.yml`, version the protocol artifacts for each release, and let every SDK release follow its own semantic version set (the Rust SDK is `0.1.7` for this cycle).
 - Document the split in the README, roadmap, and release process so contributors understand the release boundaries (protocol layer for stability, SDKs for ergonomics).
 - Align the tooling so the protocol layer publishes first and SDKs run afterwards against the freshly published artifacts while keeping Phase 2 guarantees frozen.
 
@@ -14,6 +14,10 @@ All notable changes to ALPINE will be documented in this file.
 - Ship a deterministic `RecoveryMonitor` that starts/completes recovery on sustained or burst loss, annotates retransmitted frames, and never rewinds or reorders the timeline.
 - Introduce Phase 3.3.1's pure adaptation core (deterministic state + decision engine) scoped to keyframe cadence, delta depth, and deadlines without integrating yet.
 - Begin Phase 3.3.2 by wiring the adaptation state into the streaming path: network + recovery update `AdaptationState`, and every frame carries `alpine_adaptation` metadata plus a keyframe flag.
+
+## [2.0.18] - 2025-11-30
+- Bump the protocol artifacts (`alpine-protocol-rs`, `@alpine-core/protocol`, `alnp`) to `2.0.18` and document the SDK release workflow so they can be published reliably.
+- Publish the SDK packages (`sdk/rust`, `sdk/ts`, `sdk/python`) at `0.1.7`, ensuring they depend on the freshly tagged protocol release and that the release docs reference the new tag-and-dependency versions.
 
 ## [1.2.4] - 2025-11-29
 - Bump Rust, TypeScript, and Python package versions to `1.2.4` so the SDK release tags align with publishable artifacts.
